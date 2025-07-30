@@ -14,6 +14,7 @@ interface TaskInputProps {
     priority: number
     time_estimate?: number
     tags?: string[]
+    energy_type?: 'creative' | 'administrative' | 'physical' | 'social'
   }>) => void
   disabled?: boolean
 }
@@ -35,7 +36,8 @@ export function TaskInput({ onTasksCreated, disabled = false }: TaskInputProps) 
         description: task.description,
         priority: task.priority,
         time_estimate: task.timeEstimate,
-        tags: task.tags || []
+        tags: task.tags || [],
+        energy_type: task.energyType
       }))
 
       onTasksCreated(tasks)
@@ -48,7 +50,8 @@ export function TaskInput({ onTasksCreated, disabled = false }: TaskInputProps) 
         title: text.trim(),
         priority: 5,
         time_estimate: 30,
-        tags: []
+        tags: [],
+        energy_type: 'administrative'
       }])
       setInput('')
     } finally {

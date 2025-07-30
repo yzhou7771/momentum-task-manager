@@ -6,6 +6,12 @@ import { useNotifications } from '@/hooks/useNotifications'
 import { TaskInput } from '@/components/tasks/TaskInput'
 import { TaskList } from '@/components/tasks/TaskList'
 import { NotificationSetup } from '@/components/notifications/NotificationSetup'
+import { MoodEnergyCheckIn } from '@/components/energy/MoodEnergyCheckIn'
+import { EnergyPatterns } from '@/components/energy/EnergyPatterns'
+import { SmartRecommendations } from '@/components/recommendations/SmartRecommendations'
+import { PomodoroTimer } from '@/components/productivity/PomodoroTimer'
+import { HabitTracker } from '@/components/habits/HabitTracker'
+import { ProductivityAnalytics } from '@/components/analytics/ProductivityAnalytics'
 import { Task } from '@/lib/supabase'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/Tabs'
 import { Progress } from '@/components/ui/Progress'
@@ -13,7 +19,10 @@ import {
   Calendar,
   Target,
   TrendingUp,
-  CheckCircle2
+  CheckCircle2,
+  Brain,
+  BarChart3,
+  Timer
 } from 'lucide-react'
 
 export function Dashboard() {
@@ -31,6 +40,7 @@ export function Dashboard() {
 
   const { showTaskCompleted } = useNotifications()
   const [activeTab, setActiveTab] = useState('all')
+  const [selectedTask, setSelectedTask] = useState<Task | null>(null)
 
   // Filter tasks by status
   const inboxTasks = allTasks.filter(task => task.status === 'inbox')
@@ -48,6 +58,7 @@ export function Dashboard() {
     priority: number
     time_estimate?: number
     tags?: string[]
+    energy_type?: 'creative' | 'administrative' | 'physical' | 'social'
   }>) => {
     try {
       console.log('📝 Creating tasks:', tasks)
@@ -156,49 +167,126 @@ export function Dashboard() {
 
       {/* Task Lists */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="all">All Tasks ({totalTasks})</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-6">
+          <TabsTrigger value="all">Tasks ({totalTasks})</TabsTrigger>
+          <TabsTrigger value="energy">
+            <Brain className="w-4 h-4 mr-1" />
+            Energy
+          </TabsTrigger>
+          <TabsTrigger value="focus">
+            <Timer className="w-4 h-4 mr-1" />
+            Focus
+          </TabsTrigger>
+          <TabsTrigger value="habits">Habits</TabsTrigger>
+          <TabsTrigger value="analytics">
+            <BarChart3 className="w-4 h-4 mr-1" />
+            Analytics
+          </TabsTrigger>
           <TabsTrigger value="inbox">Inbox ({inboxTasks.length})</TabsTrigger>
-          <TabsTrigger value="active">Active ({activeTasks.length})</TabsTrigger>
-          <TabsTrigger value="completed">Completed ({completedTasks.length})</TabsTrigger>
         </TabsList>
 
         <TabsContent value="all" className="space-y-6">
-          {inboxTasks.length > 0 && (
-            <TaskList
-              tasks={inboxTasks}
-              title="📥 Inbox"
-              emptyMessage="No tasks in your inbox"
-              onComplete={handleCompleteTask}
-              onMoveToActive={moveToActive}
-              onMoveToInbox={moveToInbox}
-              onDelete={deleteTask}
-            />
-          )}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="lg:col-span-2 space-y-6">
+              <SmartRecommendations 
+                tasks={allTasks} 
+                onTaskSelect={setSelectedTask}
+              />
+              
+              {inboxTasks.length > 0 && (
+                <TaskList
+                  tasks={inboxTasks}
+                  title="📥 Inbox"
+                  emptyMessage="No tasks in your inbox"
+                  onComplete={handleCompleteTask}
+                  onMoveToActive={moveToActive}
+                  onMoveToInbox={moveToInbox}
+                  onDelete={deleteTask}
+                />
+              )}
 
-          {activeTasks.length > 0 && (
-            <TaskList
-              tasks={activeTasks}
-              title="⚡ Active"
-              emptyMessage="No active tasks"
-              onComplete={handleCompleteTask}
-              onMoveToActive={moveToActive}
-              onMoveToInbox={moveToInbox}
-              onDelete={deleteTask}
-            />
-          )}
+              {activeTasks.length > 0 && (
+                <TaskList
+                  tasks={activeTasks}
+                  title="⚡ Active"
+                  emptyMessage="No active tasks"
+                  onComplete={handleCompleteTask}
+                  onMoveToActive={moveToActive}
+                  onMoveToInbox={moveToInbox}
+                  onDelete={deleteTask}
+                />
+              )}
 
-          {completedTasks.length > 0 && (
-            <TaskList
-              tasks={completedTasks.slice(0, 5)}
-              title="✅ Recently Completed"
-              emptyMessage="No completed tasks"
-              onComplete={handleCompleteTask}
-              onMoveToActive={moveToActive}
-              onMoveToInbox={moveToInbox}
-              onDelete={deleteTask}
+              {completedTasks.length > 0 && (
+                <TaskList
+                  tasks={completedTasks.slice(0, 5)}
+                  title="✅ Recently Completed"
+                  emptyMessage="No completed tasks"
+                  onComplete={handleCompleteTask}
+                  onMoveToActive={moveToActive}
+                  onMoveToInbox={moveToInbox}
+                  onDelete={deleteTask}
+                />
+              )}
+            </div>
+            
+            <div className="space-y-6">
+              <MoodEnergyCheckIn />
+              <EnergyPatterns />
+            </div>
+          </div>
+        </TabsContent>
+
+        {/* Energy Tab */}
+        <TabsContent value="energy" className="space-y-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <MoodEnergyCheckIn />
+            <EnergyPatterns />
+          </div>
+          <SmartRecommendations 
+            tasks={allTasks} 
+            onTaskSelect={setSelectedTask}
+          />
+        </TabsContent>
+
+        {/* Focus Tab */}
+        <TabsContent value="focus" className="space-y-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <PomodoroTimer 
+              selectedTask={selectedTask || activeTasks[0] || inboxTasks[0]} 
             />
-          )}
+            <div className="space-y-4">
+              {selectedTask && (
+                <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
+                  <h4 className="font-medium text-blue-900 mb-2">Selected Task</h4>
+                  <p className="text-blue-800">{selectedTask.title}</p>
+                  {selectedTask.description && (
+                    <p className="text-sm text-blue-600 mt-1">{selectedTask.description}</p>
+                  )}
+                </div>
+              )}
+              
+              <TaskList
+                tasks={activeTasks.slice(0, 5)}
+                title="⚡ Active Tasks"
+                emptyMessage="No active tasks"
+                onComplete={handleCompleteTask}
+                onMoveToActive={moveToActive}
+                onMoveToInbox={moveToInbox}
+                onDelete={deleteTask}
+              />
+            </div>
+          </div>
+        </TabsContent>
+
+        {/* Habits Tab */}
+        <TabsContent value="habits">
+          <HabitTracker />
+        </TabsContent>
+
+        {/* Analytics Tab */}
+        <TabsContent value="analytics">
+          <ProductivityAnalytics />
         </TabsContent>
 
         <TabsContent value="inbox">

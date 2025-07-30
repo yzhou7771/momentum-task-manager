@@ -5,6 +5,7 @@ export interface TaskAnalysis {
     priority: number
     timeEstimate?: number
     tags?: string[]
+    energyType?: 'creative' | 'administrative' | 'physical' | 'social'
   }>
   summary: string
 }
@@ -33,7 +34,8 @@ export async function analyzeTaskInput(input: string): Promise<TaskAnalysis> {
       title: task.trim(),
       priority: 5,
       timeEstimate: 30,
-      tags: []
+      tags: [],
+      energyType: 'administrative' as const // Default fallback
     })).filter(task => task.title.length > 0)
 
     return {

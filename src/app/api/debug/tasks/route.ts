@@ -4,9 +4,9 @@ import { supabase } from '@/lib/supabase'
 export async function GET(request: NextRequest) {
   try {
     // 检查数据库连接
-    const { data: connection, error: connectionError } = await supabase
+    const { count: tasksCount, error: connectionError } = await supabase
       .from('tasks')
-      .select('count', { count: 'exact', head: true })
+      .select('*', { count: 'exact', head: true })
 
     if (connectionError) {
       return NextResponse.json({
@@ -33,7 +33,7 @@ export async function GET(request: NextRequest) {
     // 检查RLS策略
     const debugInfo = {
       database_connection: 'OK',
-      total_tasks_count: connection?.count || 0,
+      total_tasks_count: tasksCount || 0,
       session_exists: !!session,
       user_id: session?.user?.id || 'Not authenticated',
       all_tasks: allTasks || [],

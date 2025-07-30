@@ -12,28 +12,30 @@ export interface TaskAnalysis {
     priority: number
     timeEstimate?: number
     tags?: string[]
+    energyType?: 'creative' | 'administrative' | 'physical' | 'social'
   }>
   summary: string
 }
 
 export async function POST(request: NextRequest) {
+  const requestBody = await request.json()
+  const input = requestBody.input
+
+  if (!input || typeof input !== 'string') {
+    return NextResponse.json(
+      { error: 'Invalid input provided' },
+      { status: 400 }
+    )
+  }
+
   try {
-    const { input } = await request.json()
-
-    if (!input || typeof input !== 'string') {
-      return NextResponse.json(
-        { error: 'Invalid input provided' },
-        { status: 400 }
-      )
-    }
-
     const response = await anthropic.messages.create({
       model: 'claude-3-5-sonnet-20241022',
       max_tokens: 1000,
       messages: [
         {
           role: 'user',
-          content: `Analyze this task input and extract individual tasks with priorities and estimates. Return JSON only:
+          content: `Analyze this task input and extract individual tasks with priorities, estimates, and energy types. Return JSON only:
 
 Input: "${input}"
 
@@ -45,13 +47,19 @@ Response format:
       "description": "Optional description",
       "priority": 1-10,
       "timeEstimate": 30,
-      "tags": ["tag1", "tag2"]
+      "tags": ["tag1", "tag2"],
+      "energyType": "creative|administrative|physical|social"
     }
   ],
   "summary": "Brief summary of what was processed"
 }
 
-Prioritize based on urgency/importance. Estimate time in minutes. Extract relevant tags.`
+Prioritize based on urgency/importance. Estimate time in minutes. Extract relevant tags.
+Classify energy type as:
+- creative: Design, writing, brainstorming, innovation, artistic work
+- administrative: Email, scheduling, documentation, data entry, organizing
+- physical: Exercise, cleaning, errands, moving things, manual tasks
+- social: Meetings, calls, networking, collaboration, presentations`
         }
       ]
     })
@@ -66,13 +74,13 @@ Prioritize based on urgency/importance. Estimate time in minutes. Extract releva
   } catch (error) {
     console.error('Claude API error:', error)
     
-    // Fallback: simple task extraction
-    // 我们已经解析了request.json()，所以需要重新获取input
-    const fallbackTasks = input.split(/[,\n]/).map((task: string, index: number) => ({
+    // Fallback: simple task extraction using the input we already have
+    const fallbackTasks = input.split(/[,\n]/).map((task: string) => ({
       title: task.trim(),
       priority: 5,
       timeEstimate: 30,
-      tags: []
+      tags: [],
+      energyType: 'administrative' as const
     })).filter((task: any) => task.title.length > 0)
 
     const fallbackAnalysis: TaskAnalysis = {

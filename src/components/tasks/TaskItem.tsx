@@ -58,7 +58,11 @@ export function TaskItem({
             onClick={async () => {
               if (task.status === 'completed') {
                 onMoveToInbox(task.id)
-              } else {
+              } else if (task.status === 'inbox') {
+                // Inbox → Active (不是直接完成)
+                onMoveToActive(task.id)
+              } else if (task.status === 'active') {
+                // Active → Completed
                 setIsCompleting(true)
                 setTimeout(() => {
                   onComplete(task.id)
@@ -70,8 +74,10 @@ export function TaskItem({
           >
             {task.status === 'completed' ? (
               <CheckCircle2 className="w-5 h-5 text-green-600" />
+            ) : task.status === 'active' ? (
+              <Circle className="w-5 h-5 text-blue-400 hover:text-green-600 transition-colors" />
             ) : (
-              <Circle className="w-5 h-5 text-gray-400 hover:text-green-600 transition-colors" />
+              <Circle className="w-5 h-5 text-gray-400 hover:text-blue-600 transition-colors" />
             )}
           </button>
 

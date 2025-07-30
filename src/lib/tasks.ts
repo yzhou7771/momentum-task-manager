@@ -13,12 +13,19 @@ export class TaskService {
   }
 
   static async createMultipleTasks(tasksData: Array<Omit<Task, 'id' | 'created_at' | 'updated_at' | 'completed_at'>>) {
+    console.log('🔄 TaskService: Creating tasks:', tasksData)
+    
     const { data, error } = await supabase
       .from('tasks')
       .insert(tasksData)
       .select()
 
-    if (error) throw error
+    if (error) {
+      console.error('❌ TaskService error:', error)
+      throw error
+    }
+    
+    console.log('✅ TaskService: Created tasks:', data)
     return data
   }
 

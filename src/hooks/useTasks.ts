@@ -47,15 +47,31 @@ export function useTasks(status?: Task['status']) {
   }
 
   const createMultipleTasks = async (tasksData: Array<Omit<Task, 'id' | 'user_id' | 'created_at' | 'updated_at' | 'completed_at'>>) => {
-    if (!user) throw new Error('User not authenticated')
+    if (!user) {
+      console.error('❌ User not authenticated')
+      throw new Error('User not authenticated')
+    }
 
     try {
-      const newTasks = await TaskService.createMultipleTasks(
-        tasksData.map(task => ({ ...task, user_id: user.id }))
-      )
-      setTasks(prev => [...newTasks, ...prev])
+      console.log('🔄 useTasks: Creating tasks for user:', user.id)
+      console.log('🔄 useTasks: Tasks data:', tasksData)
+      
+      const tasksWithUserId = tasksData.map(task => ({ ...task, user_id: user.id }))
+      console.log('🔄 useTasks: Tasks with user_id:', tasksWithUserId)
+      
+      const newTasks = await TaskService.createMultipleTasks(tasksWithUserId)
+      console.log('✅ useTasks: New tasks from service:', newTasks)
+      
+      setTasks(prev => {
+        console.log('🔄 useTasks: Previous tasks:', prev.length)
+        const updated = [...newTasks, ...prev]
+        console.log('🔄 useTasks: Updated tasks:', updated.length)
+        return updated
+      })
+      
       return newTasks
     } catch (err: any) {
+      console.error('❌ useTasks error:', err)
       setError(err.message || 'Failed to create tasks')
       throw err
     }

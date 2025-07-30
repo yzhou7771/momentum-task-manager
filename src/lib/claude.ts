@@ -1,9 +1,3 @@
-import Anthropic from '@anthropic-ai/sdk'
-
-const anthropic = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY!,
-})
-
 export interface TaskAnalysis {
   tasks: Array<{
     title: string
@@ -17,43 +11,22 @@ export interface TaskAnalysis {
 
 export async function analyzeTaskInput(input: string): Promise<TaskAnalysis> {
   try {
-    const response = await anthropic.messages.create({
-      model: 'claude-3-sonnet-20240229',
-      max_tokens: 1000,
-      messages: [
-        {
-          role: 'user',
-          content: `Analyze this task input and extract individual tasks with priorities and estimates. Return JSON only:
-
-Input: "${input}"
-
-Response format:
-{
-  "tasks": [
-    {
-      "title": "Task title",
-      "description": "Optional description",
-      "priority": 1-10,
-      "timeEstimate": 30,
-      "tags": ["tag1", "tag2"]
-    }
-  ],
-  "summary": "Brief summary of what was processed"
-}
-
-Prioritize based on urgency/importance. Estimate time in minutes. Extract relevant tags.`
-        }
-      ]
+    const response = await fetch('/api/tasks/analyze', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ input }),
     })
 
-    const content = response.content[0]
-    if (content.type === 'text') {
-      return JSON.parse(content.text)
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`)
     }
-    
-    throw new Error('Invalid response format')
+
+    const analysis: TaskAnalysis = await response.json()
+    return analysis
   } catch (error) {
-    console.error('Claude API error:', error)
+    console.error('Task analysis API error:', error)
     
     // Fallback: simple task extraction
     const tasks = input.split(/[,\n]/).map((task, index) => ({
@@ -65,7 +38,7 @@ Prioritize based on urgency/importance. Estimate time in minutes. Extract releva
 
     return {
       tasks,
-      summary: `Extracted ${tasks.length} tasks from input`
+      summary: `Extracted ${tasks.length} tasks from input (fallback mode)`
     }
   }
 }

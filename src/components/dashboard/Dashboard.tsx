@@ -50,13 +50,18 @@ export function Dashboard() {
     tags?: string[]
   }>) => {
     try {
+      console.log('📝 Creating tasks:', tasks)
       const taskData = tasks.map(task => ({
         ...task,
         status: 'inbox' as const
       }))
-      await createMultipleTasks(taskData)
+      console.log('📤 Sending to createMultipleTasks:', taskData)
+      const newTasks = await createMultipleTasks(taskData)
+      console.log('✅ Tasks created successfully:', newTasks)
     } catch (error) {
-      console.error('Failed to create tasks:', error)
+      console.error('❌ Failed to create tasks:', error)
+      // 显示错误消息给用户
+      alert(`创建任务失败: ${error instanceof Error ? error.message : '未知错误'}`)
     }
   }
 

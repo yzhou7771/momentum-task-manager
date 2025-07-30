@@ -134,9 +134,18 @@ export function PomodoroTimer({ selectedTask, onSessionComplete }: PomodoroTimer
     if (phase === 'work' && !currentSession) {
       // Create new pomodoro session
       try {
+        // Get current user
+        const { data: { user }, error: userError } = await supabase.auth.getUser()
+        if (userError || !user) {
+          console.error('User not authenticated for pomodoro session')
+          setIsRunning(true) // Still allow timer to run without saving
+          return
+        }
+
         const { data, error } = await supabase
           .from('pomodoro_sessions')
           .insert({
+            user_id: user.id,
             task_id: selectedTask?.id || null,
             duration_minutes: durations.work,
             completed: false

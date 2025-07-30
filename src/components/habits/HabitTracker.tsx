@@ -75,9 +75,16 @@ export function HabitTracker() {
     if (!newHabitName.trim()) return
 
     try {
+      // Get current user
+      const { data: { user }, error: userError } = await supabase.auth.getUser()
+      if (userError || !user) {
+        throw new Error('User not authenticated')
+      }
+
       const { data, error } = await supabase
         .from('habits')
         .insert({
+          user_id: user.id,
           name: newHabitName.trim(),
           description: newHabitDescription.trim() || null,
           target_frequency: newHabitFrequency
@@ -107,10 +114,17 @@ export function HabitTracker() {
 
   const handleCompleteHabit = async (habitId: string) => {
     try {
+      // Get current user
+      const { data: { user }, error: userError } = await supabase.auth.getUser()
+      if (userError || !user) {
+        throw new Error('User not authenticated')
+      }
+
       const { data, error } = await supabase
         .from('habit_completions')
         .insert({
-          habit_id: habitId
+          habit_id: habitId,
+          user_id: user.id
         })
         .select()
         .single()

@@ -51,9 +51,16 @@ export function MoodEnergyCheckIn({ onLogSubmitted }: MoodEnergyCheckInProps) {
 
     setIsSubmitting(true)
     try {
+      // Get current user
+      const { data: { user }, error: userError } = await supabase.auth.getUser()
+      if (userError || !user) {
+        throw new Error('User not authenticated')
+      }
+
       const { data, error } = await supabase
         .from('mood_energy_logs')
         .insert({
+          user_id: user.id,
           energy_level: energyLevel,
           mood: mood,
           notes: notes.trim() || null

@@ -12,6 +12,7 @@ import { SmartRecommendations } from '@/components/recommendations/SmartRecommen
 import { PomodoroTimer } from '@/components/productivity/PomodoroTimer'
 import { HabitTracker } from '@/components/habits/HabitTracker'
 import { ProductivityAnalytics } from '@/components/analytics/ProductivityAnalytics'
+import { HealthIntegration } from '@/components/health/HealthIntegration'
 import { Task } from '@/lib/supabase'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/Tabs'
 import { Progress } from '@/components/ui/Progress'
@@ -243,10 +244,13 @@ export function Dashboard() {
             <MoodEnergyCheckIn />
             <EnergyPatterns />
           </div>
-          <SmartRecommendations 
-            tasks={allTasks} 
-            onTaskSelect={setSelectedTask}
-          />
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <SmartRecommendations 
+              tasks={allTasks} 
+              onTaskSelect={setSelectedTask}
+            />
+            <HealthIntegration />
+          </div>
         </TabsContent>
 
         {/* Focus Tab */}

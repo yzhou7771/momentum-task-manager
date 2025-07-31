@@ -135,7 +135,7 @@ export function TaskEditModal({ task, isOpen, onClose, onSave }: TaskEditModalPr
 
   return (
     <div 
-      className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50"
+      className="fixed inset-0 bg-gradient-to-br from-amber-50/80 via-orange-50/80 to-yellow-50/80 backdrop-blur-sm flex items-center justify-center p-4 z-50"
       onClick={(e) => {
         if (e.target === e.currentTarget && !loading) {
           onClose()

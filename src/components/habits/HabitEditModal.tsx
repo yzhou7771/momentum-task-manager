@@ -114,7 +114,7 @@ export function HabitEditModal({ habit, isOpen, onClose, onSave }: HabitEditModa
 
   return (
     <div 
-      className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50"
+      className="fixed inset-0 bg-gradient-to-br from-emerald-50/80 via-green-50/80 to-teal-50/80 backdrop-blur-sm flex items-center justify-center p-4 z-50"
       onClick={(e) => {
         if (e.target === e.currentTarget && !loading) {
           onClose()

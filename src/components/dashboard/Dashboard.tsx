@@ -189,7 +189,7 @@ export function Dashboard() {
 
       {/* Task Lists */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-5">
+        <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="all">Tasks ({totalTasks})</TabsTrigger>
           <TabsTrigger value="energy">
             <Brain className="w-4 h-4 mr-1" />
@@ -200,7 +200,6 @@ export function Dashboard() {
             <BarChart3 className="w-4 h-4 mr-1" />
             Analytics
           </TabsTrigger>
-          <TabsTrigger value="inbox">Inbox ({inboxTasks.length})</TabsTrigger>
         </TabsList>
 
         <TabsContent value="all" className="space-y-6">
@@ -284,44 +283,7 @@ export function Dashboard() {
           <ProductivityAnalytics />
         </TabsContent>
 
-        <TabsContent value="inbox">
-          <TaskList
-            tasks={inboxTasks}
-            title="📥 Inbox"
-            emptyMessage="Your inbox is empty! Add some tasks to get started."
-            onComplete={completeTask}
-            onMoveToActive={moveToActive}
-            onMoveToInbox={moveToInbox}
-            onDelete={deleteTask}
-            onEdit={handleEditTask}
-          />
-        </TabsContent>
 
-        <TabsContent value="active">
-          <TaskList
-            tasks={activeTasks}
-            title="⚡ Active Tasks"
-            emptyMessage="No active tasks. Move some tasks from your inbox to get started!"
-            onComplete={completeTask}
-            onMoveToActive={moveToActive}
-            onMoveToInbox={moveToInbox}
-            onDelete={deleteTask}
-            onEdit={handleEditTask}
-          />
-        </TabsContent>
-
-        <TabsContent value="completed">
-          <TaskList
-            tasks={completedTasks}
-            title="✅ Completed Tasks"
-            emptyMessage="No completed tasks yet. Complete some tasks to see them here!"
-            onComplete={completeTask}
-            onMoveToActive={moveToActive}
-            onMoveToInbox={moveToInbox}
-            onDelete={deleteTask}
-            onEdit={handleEditTask}
-          />
-        </TabsContent>
       </Tabs>
 
       {error && (

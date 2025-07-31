@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/Button'
 import { supabase, Habit, HabitCompletion } from '@/lib/supabase'
+import { HabitEditModal } from './HabitEditModal'
 import { 
   Plus,
   CheckCircle2,
@@ -26,6 +27,8 @@ export function HabitTracker() {
   const [newHabitName, setNewHabitName] = useState('')
   const [newHabitDescription, setNewHabitDescription] = useState('')
   const [newHabitFrequency, setNewHabitFrequency] = useState(1)
+  const [editingHabit, setEditingHabit] = useState<Habit | null>(null)
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false)
 
   useEffect(() => {
     fetchHabits()
@@ -170,6 +173,38 @@ export function HabitTracker() {
     // This would require more complex logic to calculate streaks
     // For now, return a placeholder
     return 0
+  }
+
+  const handleEditHabit = (habit: Habit) => {
+    setEditingHabit(habit)
+    setIsEditModalOpen(true)
+  }
+
+  const handleSaveHabit = async (habitId: string, updates: Partial<Habit>) => {
+    try {
+      const { error } = await supabase
+        .from('habits')
+        .update(updates)
+        .eq('id', habitId)
+
+      if (error) throw error
+
+      // Update local state optimistically
+      setHabits(prev => prev.map(habit => 
+        habit.id === habitId 
+          ? { ...habit, ...updates }
+          : habit
+      ))
+    } catch (error) {
+      console.error('Failed to update habit:', error)
+      // The HabitEditModal will handle displaying the error
+      throw error
+    }
+  }
+
+  const handleCloseEditModal = () => {
+    setIsEditModalOpen(false)
+    setEditingHabit(null)
   }
 
   if (loading) {
@@ -356,8 +391,17 @@ export function HabitTracker() {
                     )}
                     
                     <button
+                      onClick={() => handleEditHabit(habit)}
+                      className="p-1 text-gray-400 hover:text-green-600 transition-colors"
+                      title="Edit habit"
+                    >
+                      <Edit3 className="w-4 h-4" />
+                    </button>
+                    
+                    <button
                       onClick={() => handleDeleteHabit(habit.id)}
                       className="p-1 text-gray-400 hover:text-red-600 transition-colors"
+                      title="Delete habit"
                     >
                       <Trash2 className="w-4 h-4" />
                     </button>
@@ -394,6 +438,14 @@ export function HabitTracker() {
           </div>
         </div>
       )}
+
+      {/* Habit Edit Modal */}
+      <HabitEditModal
+        habit={editingHabit}
+        isOpen={isEditModalOpen}
+        onClose={handleCloseEditModal}
+        onSave={handleSaveHabit}
+      />
     </div>
   )
 }

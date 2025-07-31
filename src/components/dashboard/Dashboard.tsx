@@ -5,6 +5,7 @@ import { useTasks } from '@/hooks/useTasks'
 import { useNotifications } from '@/hooks/useNotifications'
 import { TaskInput } from '@/components/tasks/TaskInput'
 import { TaskList } from '@/components/tasks/TaskList'
+import { TaskEditModal } from '@/components/tasks/TaskEditModal'
 import { NotificationSetup } from '@/components/notifications/NotificationSetup'
 import { MoodEnergyCheckIn } from '@/components/energy/MoodEnergyCheckIn'
 import { EnergyPatterns } from '@/components/energy/EnergyPatterns'
@@ -42,6 +43,8 @@ export function Dashboard() {
   const { showTaskCompleted } = useNotifications()
   const [activeTab, setActiveTab] = useState('all')
   const [selectedTask, setSelectedTask] = useState<Task | null>(null)
+  const [editingTask, setEditingTask] = useState<Task | null>(null)
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false)
 
   // Filter tasks by status
   const inboxTasks = allTasks.filter(task => task.status === 'inbox')
@@ -88,6 +91,27 @@ export function Dashboard() {
     } catch (error) {
       console.error('Failed to complete task:', error)
     }
+  }
+
+  const handleEditTask = (task: Task) => {
+    setEditingTask(task)
+    setIsEditModalOpen(true)
+  }
+
+  const handleSaveTask = async (taskId: string, updates: Partial<Task>) => {
+    try {
+      await updateTask(taskId, updates)
+      // Could add a success notification here if desired
+    } catch (error) {
+      console.error('Failed to update task:', error)
+      // The TaskEditModal will handle displaying the error
+      throw error
+    }
+  }
+
+  const handleCloseEditModal = () => {
+    setIsEditModalOpen(false)
+    setEditingTask(null)
   }
 
   if (loading) {
@@ -203,6 +227,7 @@ export function Dashboard() {
                   onMoveToActive={moveToActive}
                   onMoveToInbox={moveToInbox}
                   onDelete={deleteTask}
+                  onEdit={handleEditTask}
                 />
               )}
 
@@ -215,6 +240,7 @@ export function Dashboard() {
                   onMoveToActive={moveToActive}
                   onMoveToInbox={moveToInbox}
                   onDelete={deleteTask}
+                  onEdit={handleEditTask}
                 />
               )}
 
@@ -227,6 +253,7 @@ export function Dashboard() {
                   onMoveToActive={moveToActive}
                   onMoveToInbox={moveToInbox}
                   onDelete={deleteTask}
+                  onEdit={handleEditTask}
                 />
               )}
             </div>
@@ -278,6 +305,7 @@ export function Dashboard() {
                 onMoveToActive={moveToActive}
                 onMoveToInbox={moveToInbox}
                 onDelete={deleteTask}
+                onEdit={handleEditTask}
               />
             </div>
           </div>
@@ -302,6 +330,7 @@ export function Dashboard() {
             onMoveToActive={moveToActive}
             onMoveToInbox={moveToInbox}
             onDelete={deleteTask}
+            onEdit={handleEditTask}
           />
         </TabsContent>
 
@@ -314,6 +343,7 @@ export function Dashboard() {
             onMoveToActive={moveToActive}
             onMoveToInbox={moveToInbox}
             onDelete={deleteTask}
+            onEdit={handleEditTask}
           />
         </TabsContent>
 
@@ -326,6 +356,7 @@ export function Dashboard() {
             onMoveToActive={moveToActive}
             onMoveToInbox={moveToInbox}
             onDelete={deleteTask}
+            onEdit={handleEditTask}
           />
         </TabsContent>
       </Tabs>
@@ -335,6 +366,14 @@ export function Dashboard() {
           {error}
         </div>
       )}
+
+      {/* Task Edit Modal */}
+      <TaskEditModal
+        task={editingTask}
+        isOpen={isEditModalOpen}
+        onClose={handleCloseEditModal}
+        onSave={handleSaveTask}
+      />
     </div>
   )
 }

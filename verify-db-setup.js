@@ -22,8 +22,7 @@ async function verifyTables() {
   const tables = [
     'mood_energy_logs',
     'habits', 
-    'habit_completions',
-    'pomodoro_sessions'
+    'habit_completions'
   ]
   
   for (const table of tables) {

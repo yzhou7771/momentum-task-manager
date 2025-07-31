@@ -380,16 +380,6 @@ export function HabitTracker() {
                   </div>
                   
                   <div className="flex items-center space-x-2">
-                    {!isCompleted && habit.todayCompletions < habit.target_frequency && (
-                      <Button
-                        onClick={() => handleCompleteHabit(habit.id)}
-                        size="sm"
-                        className="bg-green-600 hover:bg-green-700 text-white"
-                      >
-                        Mark Done
-                      </Button>
-                    )}
-                    
                     <button
                       onClick={() => handleEditHabit(habit)}
                       className="p-1 text-gray-400 hover:text-green-600 transition-colors"

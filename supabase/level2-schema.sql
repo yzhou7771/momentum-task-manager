@@ -37,16 +37,6 @@ CREATE TABLE IF NOT EXISTS public.habit_completions (
     notes TEXT
 );
 
--- Create pomodoro sessions table
-CREATE TABLE IF NOT EXISTS public.pomodoro_sessions (
-    id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
-    user_id UUID REFERENCES public.users(id) ON DELETE CASCADE,
-    task_id UUID REFERENCES public.tasks(id) ON DELETE SET NULL,
-    duration_minutes INTEGER DEFAULT 25,
-    completed BOOLEAN DEFAULT false,
-    started_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    completed_at TIMESTAMP WITH TIME ZONE
-);
 
 -- Add energy type to tasks table
 ALTER TABLE public.tasks ADD COLUMN IF NOT EXISTS energy_type task_energy_type;
@@ -57,7 +47,6 @@ CREATE INDEX IF NOT EXISTS idx_mood_energy_logs_logged_at ON public.mood_energy_
 CREATE INDEX IF NOT EXISTS idx_habits_user_id ON public.habits(user_id);
 CREATE INDEX IF NOT EXISTS idx_habit_completions_user_id ON public.habit_completions(user_id);
 CREATE INDEX IF NOT EXISTS idx_habit_completions_habit_id ON public.habit_completions(habit_id);
-CREATE INDEX IF NOT EXISTS idx_pomodoro_sessions_user_id ON public.pomodoro_sessions(user_id);
 CREATE INDEX IF NOT EXISTS idx_tasks_energy_type ON public.tasks(energy_type);
 
 -- Add updated_at trigger for habits
@@ -68,7 +57,6 @@ CREATE TRIGGER update_habits_updated_at BEFORE UPDATE ON public.habits
 ALTER TABLE public.mood_energy_logs ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.habits ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.habit_completions ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.pomodoro_sessions ENABLE ROW LEVEL SECURITY;
 
 -- RLS Policies - Users can only see their own data
 CREATE POLICY "Users can view own mood_energy_logs" ON public.mood_energy_logs
@@ -80,5 +68,3 @@ CREATE POLICY "Users can view own habits" ON public.habits
 CREATE POLICY "Users can view own habit_completions" ON public.habit_completions
     FOR ALL USING (auth.uid() = user_id);
 
-CREATE POLICY "Users can view own pomodoro_sessions" ON public.pomodoro_sessions
-    FOR ALL USING (auth.uid() = user_id);

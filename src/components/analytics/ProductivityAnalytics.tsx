@@ -1,15 +1,13 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
-import { supabase, Task, MoodEnergyLog, PomodoroSession, HabitCompletion } from '@/lib/supabase'
+import { supabase } from '@/lib/supabase'
 import { analyzeEnergyPatterns } from '@/lib/energy-recommendations'
 import { 
   BarChart3,
   TrendingUp,
-  Clock,
   Target,
   Zap,
-  Calendar,
   Award,
   Activity
 } from 'lucide-react'
@@ -19,8 +17,6 @@ interface ProductivityStats {
   completedTasks: number
   completionRate: number
   averageTaskTime: number
-  totalPomodoroSessions: number
-  completedPomodoros: number
   habitCompletionRate: number
   mostProductiveTime: string
   energyPatterns: any
@@ -61,13 +57,6 @@ export function ProductivityAnalytics() {
 
       if (energyError) throw energyError
 
-      // Fetch pomodoro sessions
-      const { data: pomodoroSessions, error: pomodoroError } = await supabase
-        .from('pomodoro_sessions')
-        .select('*')
-        .gte('started_at', startDate.toISOString())
-
-      if (pomodoroError) throw pomodoroError
 
       // Fetch habit completions
       const { data: habitCompletions, error: habitError } = await supabase
@@ -86,8 +75,6 @@ export function ProductivityAnalytics() {
         return acc + (task.time_estimate || 30)
       }, 0) / (completedTasks.length || 1)
 
-      // Pomodoro stats
-      const completedPomodoros = pomodoroSessions?.filter(p => p.completed) || []
       
       // Energy pattern analysis
       const energyPatterns = analyzeEnergyPatterns(energyLogs || [])
@@ -116,8 +103,6 @@ export function ProductivityAnalytics() {
         completedTasks: completedTasks.length,
         completionRate,
         averageTaskTime,
-        totalPomodoroSessions: pomodoroSessions?.length || 0,
-        completedPomodoros: completedPomodoros.length,
         habitCompletionRate: 85, // Simplified calculation
         mostProductiveTime: mostProductiveHour ? formatHour(mostProductiveHour) : 'N/A',
         energyPatterns
@@ -203,14 +188,14 @@ export function ProductivityAnalytics() {
 
         <div className="p-4 bg-green-50 rounded-lg">
           <div className="flex items-center space-x-2 mb-2">
-            <Clock className="w-5 h-5 text-green-600" />
-            <span className="text-sm font-medium text-green-800">Focus Sessions</span>
+            <Activity className="w-5 h-5 text-green-600" />
+            <span className="text-sm font-medium text-green-800">Active Tasks</span>
           </div>
           <div className="text-2xl font-bold text-green-900">
-            {stats.completedPomodoros}
+            {stats.totalTasks - stats.completedTasks}
           </div>
           <div className="text-sm text-green-600">
-            {stats.totalPomodoroSessions} total sessions
+            Currently in progress
           </div>
         </div>
 
@@ -270,9 +255,6 @@ export function ProductivityAnalytics() {
             <div className="space-y-1 text-sm text-blue-700">
               {stats.completionRate < 70 && (
                 <div>• Try breaking large tasks into smaller, manageable pieces</div>
-              )}
-              {stats.completedPomodoros < 3 && (
-                <div>• Use the Pomodoro timer to improve focus and task completion</div>
               )}
               {stats.energyPatterns.recommendations.length === 0 && (
                 <div>• Log your energy levels regularly to discover your optimal work patterns</div>

@@ -71,12 +71,3 @@ export interface HabitCompletion {
   notes?: string
 }
 
-export interface PomodoroSession {
-  id: string
-  user_id: string
-  task_id?: string
-  duration_minutes: number
-  completed: boolean
-  started_at: string
-  completed_at?: string
-}

@@ -10,7 +10,6 @@ import { NotificationSetup } from '@/components/notifications/NotificationSetup'
 import { MoodEnergyCheckIn } from '@/components/energy/MoodEnergyCheckIn'
 import { EnergyPatterns } from '@/components/energy/EnergyPatterns'
 import { SmartRecommendations } from '@/components/recommendations/SmartRecommendations'
-import { PomodoroTimer } from '@/components/productivity/PomodoroTimer'
 import { HabitTracker } from '@/components/habits/HabitTracker'
 import { ProductivityAnalytics } from '@/components/analytics/ProductivityAnalytics'
 import { HealthIntegration } from '@/components/health/HealthIntegration'
@@ -23,8 +22,7 @@ import {
   TrendingUp,
   CheckCircle2,
   Brain,
-  BarChart3,
-  Timer
+  BarChart3
 } from 'lucide-react'
 
 export function Dashboard() {
@@ -42,7 +40,6 @@ export function Dashboard() {
 
   const { showTaskCompleted } = useNotifications()
   const [activeTab, setActiveTab] = useState('all')
-  const [selectedTask, setSelectedTask] = useState<Task | null>(null)
   const [editingTask, setEditingTask] = useState<Task | null>(null)
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
 
@@ -192,15 +189,11 @@ export function Dashboard() {
 
       {/* Task Lists */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-6">
+        <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="all">Tasks ({totalTasks})</TabsTrigger>
           <TabsTrigger value="energy">
             <Brain className="w-4 h-4 mr-1" />
             Energy
-          </TabsTrigger>
-          <TabsTrigger value="focus">
-            <Timer className="w-4 h-4 mr-1" />
-            Focus
           </TabsTrigger>
           <TabsTrigger value="habits">Habits</TabsTrigger>
           <TabsTrigger value="analytics">
@@ -215,7 +208,7 @@ export function Dashboard() {
             <div className="lg:col-span-2 space-y-6">
               <SmartRecommendations 
                 tasks={allTasks} 
-                onTaskSelect={setSelectedTask}
+                onTaskSelect={() => {}}
               />
               
               {inboxTasks.length > 0 && (
@@ -274,42 +267,12 @@ export function Dashboard() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <SmartRecommendations 
               tasks={allTasks} 
-              onTaskSelect={setSelectedTask}
+              onTaskSelect={() => {}}
             />
             <HealthIntegration />
           </div>
         </TabsContent>
 
-        {/* Focus Tab */}
-        <TabsContent value="focus" className="space-y-6">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <PomodoroTimer 
-              selectedTask={selectedTask || activeTasks[0] || inboxTasks[0]} 
-            />
-            <div className="space-y-4">
-              {selectedTask && (
-                <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
-                  <h4 className="font-medium text-blue-900 mb-2">Selected Task</h4>
-                  <p className="text-blue-800">{selectedTask.title}</p>
-                  {selectedTask.description && (
-                    <p className="text-sm text-blue-600 mt-1">{selectedTask.description}</p>
-                  )}
-                </div>
-              )}
-              
-              <TaskList
-                tasks={activeTasks.slice(0, 5)}
-                title="⚡ Active Tasks"
-                emptyMessage="No active tasks"
-                onComplete={handleCompleteTask}
-                onMoveToActive={moveToActive}
-                onMoveToInbox={moveToInbox}
-                onDelete={deleteTask}
-                onEdit={handleEditTask}
-              />
-            </div>
-          </div>
-        </TabsContent>
 
         {/* Habits Tab */}
         <TabsContent value="habits">
